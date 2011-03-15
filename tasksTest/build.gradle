@@ -1,0 +1,66 @@
+/* 
+  This is how you do things the hard way.
+  Why don't you use purrpackage gradle plugin instead? 
+  Here we're just testing.
+*/
+
+buildscript {
+    repositories {
+        flatDir name: "parentbuild", dirs: ["${projectDir}/../build/libs"];
+
+    }
+    dependencies {
+        classpath "net.sourceforge.purrpackage:purrpackage-gradle-plugin:${pluginVersion}"
+    }
+}
+
+apply plugin: 'groovy'
+apply plugin: 'eclipse'
+// apply plugin: 'purrpackage' // This test is NOT using the plugin, just the tasks.
+
+repositories {
+     mavenLocal();
+     mavenCentral();
+}
+
+configurations { purrpackage }
+
+dependencies {
+     groovy localGroovy()
+     testCompile "org.testng:testng:5.8:jdk15@jar"
+     testCompile "junit:junit:4.8.2"
+     testRuntime "net.sourceforge.purrpackage:purrpackage-runtime:${purrpackageVersion}"   
+     purrpackage "net.sourceforge.purrpackage:purrpackage:${purrpackageVersion}"
+}
+
+test {
+     useTestNG() // we must let PurrPackage take care of the JUnit tests.
+     systemProperties[ "net.sourceforge.cobertura.datafile" ] = "${project.buildDir}/purrpackage-coverage-data/cobertura.ser"
+     options.listeners << "net.sourceforge.purrpackage.recording.PerPackageCoverageListener"
+}
+
+task junit( type: net.sourceforge.purrpackage.gradle.PurrPackageJUnitTask ) {
+     initDefaults();
+     excludes << "**/SittingDuck*";
+}
+
+task instrument( type: net.sourceforge.purrpackage.gradle.CoberturaInstrumentTask ) {
+     initDefaults();
+     classpathWithCobertura = project.configurations.purrpackage.asPath;
+}
+
+task uninstrument( type: net.sourceforge.purrpackage.gradle.CoberturaUninstrumentTask ) {
+}
+
+task ppReport( type: net.sourceforge.purrpackage.gradle.PurrPackageReportTask ) {
+}
+
+
+instrument.dependsOn( testClasses );
+test.dependsOn( instrument );
+junit.dependsOn( instrument );
+ppReport.dependsOn( junit );
+ppReport.dependsOn( test );
+uninstrument.dependsOn( ppReport );
+assemble.dependsOn( uninstrument );
+build.dependsOn( ppReport );

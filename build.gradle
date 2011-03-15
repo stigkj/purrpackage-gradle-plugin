@@ -1,0 +1,88 @@
+buildscript {
+  repositories {
+     mavenLocal()
+     mavenCentral()
+  }
+  dependencies {
+     classpath "net.sourceforge.purrpackage:maven-oss-gradle-plugin:0.3.0"
+  }
+}
+
+apply plugin: 'groovy'
+apply plugin: 'eclipse'
+apply plugin: 'maven-oss'
+
+group = 'net.sourceforge.purrpackage'
+version = '1.0'
+
+repositories {
+   mavenLocal()
+   mavenCentral();
+}
+
+dependencies {
+  groovy localGroovy()
+  compile gradleApi()
+  compile "junit:junit:4.8.2"
+}
+
+boolean assertFileExists( dir, path ) {
+   def f = new File( dir, path );
+   if ( ! f.exists() ) throw new RuntimeException( "File ${f} does not exist as expected" );
+}
+
+def checkDir( dir ) {
+    def targetBuildDir = new File( dir, "build" );
+    assertFileExists( targetBuildDir, "junitOutput/TESTS-TestSuites.xml" );
+    assertFileExists( targetBuildDir, "purrpackage-report/standard/policyBrowser.html" );
+    assertFileExists( targetBuildDir, "reports/tests/testng-results.xml" );
+}
+
+task pluginTestTask( type: GradleBuild ) {
+     dependsOn test
+     dir = "pluginTest"
+     tasks = ["clean", "build"]   
+     startParameter.projectProperties.put( "purrpackageVersion", "0.7.0" )
+     startParameter.projectProperties.put( "pluginVersion", "${version}" )
+     doLast {
+       checkDir( dir );
+     }
+     doFirst {
+       delete "$dir/.gradle"
+     }
+}
+
+task taskTestTask( type: GradleBuild ) {
+     dependsOn test
+     dir = "tasksTest"
+     tasks = ["clean", "build" ]
+     startParameter.projectProperties.put( "purrpackageVersion", "0.7.0" )
+     startParameter.projectProperties.put( "pluginVersion", "${version}" )
+     doLast {
+       checkDir( dir );
+     }
+     doFirst {
+       delete "$dir/.gradle"
+     }
+}
+
+check.dependsOn( pluginTestTask );
+check.dependsOn( taskTestTask );
+
+pomConfigurator.addDeveloper( "John Roth", "dzhaughnroth@sourceforge.net" )
+pomConfigurator.gnuLicense();
+pomConfigurator.configurePom( {
+    it.pom {      
+       project {
+         name "PurrPackage Gradle Plugin"
+         description "Gradle integration for PurrPackage code coverage."
+         url "http://purrpackage-plugins.sourceforge.net"
+         inceptionYear "2011"
+         scm { // TODO same or other?
+           url "http://purrpackage.git.sourceforge.net/git/gitweb-index.cgi"
+           connection "scm:git://purrpackage.git.sourceforge.net/gitroot/purrpackage/purrpackage"
+           developerConnection "scm:git://purrpackage.git.sourceforge.net/gitroot/purrpackage/purrpackage"
+       }
+    }
+} } );
+

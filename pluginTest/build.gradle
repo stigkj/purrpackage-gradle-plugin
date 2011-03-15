@@ -1,0 +1,33 @@
+buildscript {
+    repositories {
+        flatDir name: "parentbuild", dirs: ["${projectDir}/../build/libs"];
+    }
+    dependencies {
+        classpath "net.sourceforge.purrpackage:purrpackage-gradle-plugin:${pluginVersion}"
+    }
+}
+
+apply plugin: 'groovy'
+apply plugin: 'eclipse'
+apply plugin: 'purrpackage'
+
+project.convention.plugins.purrpackage.configure {
+    useJunit = true;
+    junitIncludes = ["**/*JUnitTest.class"]; 
+}
+
+repositories {
+     mavenLocal();
+     mavenCentral();
+}
+
+dependencies {
+     groovy localGroovy()
+     testCompile "org.testng:testng:5.8:jdk15@jar"
+     testCompile "junit:junit:4.8.2"
+}
+
+test {
+     useTestNG() 
+}
+

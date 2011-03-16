@@ -52,9 +52,11 @@ class PurrPackageJUnitTask extends DefaultTask {
 		if ( toDir == null ) {
 			toDir = "${project.buildDir}/PurrPackageJUnitTaskTmp";
 		}
+                String purrpackagePath = project.configurations.purrpackage.filter( { !it.name.endsWith(".pom") } ).asPath;
 		String testRuntimePath = project.configurations.testRuntime.filter( { !it.name.endsWith(".pom" ) } ).asPath; // TODO filter elswhere?
 		logger.log( LogLevel.DEBUG, "PurrPackage is using Ant to run JUnit tests" );
-		logger.log( LogLevel.DEBUG, "PurrPackage junit to ${toDir} with args ${jvmArgs} tetRuntime path is ${testRuntimePath}" );
+		logger.log( LogLevel.DEBUG, "PurrPackage junit to ${toDir} with args ${jvmArgs} testRuntime path is ${testRuntimePath}" );
+		logger.log( LogLevel.DEBUG, "PurrPackage junit purrpackage path is ${purrpackagePath}" );
 		String mainClasses = classesDir.canonicalPath;
 		String testClasses = project.sourceSets.test.classesDir.canonicalPath;
 
@@ -62,10 +64,13 @@ class PurrPackageJUnitTask extends DefaultTask {
 		File xmlDir = new File( toDir, "xml" );
 		project.mkdir( xmlDir );
 		project.ant {
-			taskdef(name: 'junit',
+			taskdef(name: 'junitpp',
 					classname: 'org.apache.tools.ant.taskdefs.optional.junit.JUnitTask',
-					classpath: testRuntimePath);
-			'junit'( printsummary:"yes", fork:"yes", forkMode:"once", haltonfailure:"yes" ) {
+					classpath: purrpackagePath);
+			taskdef(name: 'junitreportpp',
+					classname: 'org.apache.tools.ant.taskdefs.optional.junit.XMLResultAggregator',
+					classpath: purrpackagePath);
+			'junitpp'( printsummary:"yes", fork:"yes", forkMode:"once", haltonfailure:"yes" ) {
 				jvmarg( value:"-Dnet.sourceforge.cobertura.datafile=${coverageDataFile.canonicalPath}" );
 				jvmArgs.each {
 					jvmarg( value:"${it}" );
@@ -88,7 +93,7 @@ class PurrPackageJUnitTask extends DefaultTask {
 					}
 				}
 			}
-			'junitreport'(  todir: toDir ) { 
+			'junitreportpp'(  todir: toDir ) { 
  			    fileset( dir : xmlDir ) {
 					 include( name:"TEST-*.xml" );
  			    }

@@ -35,7 +35,7 @@ class PurrPackagePlugin implements Plugin<Project> {
 		p.configurations.add( "purrpackage" );
 		p.dependencies.add( "purrpackage",
 			"net.sourceforge.purrpackage:purrpackage:${purrpackageVersion}", { exclude ( group: "org.apache.ant" ) } );
-
+                p.dependencies.add( "purrpackage", "org.apache.ant:ant-junit:1.8.2" );
 		p.dependencies.add( "testRuntime",
 				"net.sourceforge.purrpackage:purrpackage-runtime:${purrpackageVersion}", { exclude ( group: "org.apache.ant" ) } );
 

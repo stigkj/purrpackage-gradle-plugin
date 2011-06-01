@@ -22,8 +22,6 @@ import org.gradle.api.logging.LogLevel;
 
 class PurrPackagePlugin implements Plugin<Project> {
 
-//	static final String purrpackageVersion = "0.7.0"; // sigh should be configurable but when?
-
 	public void apply(Project p) {
                 String purrpackageVersion = p.properties.get( "purrpackageVersion" );
                 if ( purrpackageVersion == null || purrpackageVersion.trim().length() == 0 ) {
@@ -42,13 +40,17 @@ class PurrPackagePlugin implements Plugin<Project> {
 		CoberturaInstrumentTask instrumentTask = p.tasks.add( "purrpackageInstrument", CoberturaInstrumentTask.class );
 		instrumentTask.defaultValueFactory = config;
 
+                PurrPackageInstrumentJUnitTestTask testInstrumentTask = p.tasks.add( "purrpackageInstrumentTests", PurrPackageInstrumentJUnitTestTask.class );
+                testInstrumentTask.defaultValueFactory = config;
+
 		PurrPackageReportTask reportTask = p.tasks.add( "purrpackageReport", PurrPackageReportTask.class );
 		reportTask.defaultValueFactory = config;
 
 		CoberturaUninstrumentTask uninstrumentTask = p.tasks.add( "purrpackageUninstrument", CoberturaUninstrumentTask.class ) ;
 		
 		instrumentTask.dependsOn( p.testClasses );
-		reportTask.dependsOn( p.test );
+                testInstrumentTask.dependsOn( p.testClasses );
+//		reportTask.dependsOn( p.test );
 		uninstrumentTask.dependsOn( reportTask );
 		p.assemble.dependsOn( uninstrumentTask );
 
@@ -56,15 +58,17 @@ class PurrPackagePlugin implements Plugin<Project> {
 			if ( testTask instanceof Test ) {
 				configureTestTask(p, (Test) testTask, config)
 				testTask.dependsOn( instrumentTask );
+                                testTask.dependsOn( testInstrumentTask );
+                                reportTask.dependsOn( testTask );
 				uninstrumentTask.dependsOn( testTask );
 			}
 		}
 
-		PurrPackageJUnitTask junitTask = p.tasks.add( "purrpackageJunitRunner", PurrPackageJUnitTask.class )
-		junitTask.defaultValueFactory = config;
+//		PurrPackageJUnitTask junitTask = p.tasks.add( "purrpackageJunitRunner", PurrPackageJUnitTask.class )
+//		junitTask.defaultValueFactory = config;
 		
-		junitTask.dependsOn( p.test );
-		reportTask.dependsOn( junitTask );
+//		junitTask.dependsOn( p.test );
+//		reportTask.dependsOn( junitTask );
 		
 		p.logger.log( LogLevel.INFO, "Applied PurrPackagePlugin version ${purrpackageVersion}" );
 	}

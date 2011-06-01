@@ -1,15 +1,15 @@
 package net.sourceforge.purrpackage.gradle.test.other
 
-import junit.framework.*;
+import org.junit.Test;
 import net.sourceforge.purrpackage.gradle.test.SittingDuck;
 
 // JUnit test, and in the "wrong" package for SittingDuck
 
-class OtherDuckTest extends TestCase {
+class OtherDuckTest {
 
     def sittingDuck = new SittingDuck();
 
-    public void testWaddle( ) {
+    @Test public void testWaddle( ) {
        sittingDuck.waddle( ); 
     }
 

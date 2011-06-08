@@ -32,12 +32,16 @@ class ProjectValueFactory implements DefaultValueFactory {
 
 	File getClassesDir() { return project.sourceSets.main.classesDir };
 
-	File getSaveUninstrumentedDir() { return new File( project.buildDir, "cobertura-uninstrumented-tmp" ) };
+	File getSaveClassesDir() { return new File( project.buildDir, "cobertura-uninstrumented-tmp" ) };
 
+    File getTestClassesDir() {return project.sourceSets.test.classesDir };
+    
+    File getSaveTestClassesDir() { return new File( project.buildDir, "test-uninstrumented-tmp" ) };
+    
 	String getClasspathWithCobertura() { return project.configurations.testRuntime.asPath;}
 	
-	String getClasspathWithPurrpackage() { return project.configurations.purrpackage.asPath; }
-	
+    String getClasspathWithPurrpackage() { return project.configurations.purrpackage.asPath; }
+    
 	File getPurrpackageReportDir() { return new File( project.buildDir, "purrpackage-report" ); }
 
 	Collection getSourceDirs() { 
@@ -58,15 +62,5 @@ class ProjectValueFactory implements DefaultValueFactory {
 
 	String coveragePolicy = "";
 	String buildTimeReportScript = "";
-
-	boolean useJunit = false;
-
-	Collection<String> junitIncludes = [ "**/Test*.class", "**/*Test.class" ];
-	Collection<String> junitExcludes = [ "**/Abstract*" ];
-	Collection<String> junitJvmArgs = [ ];
-
-	File getJunitOutputDir() {
-		return new File( project.buildDir, "junitOutput" );		
-	}
 		
 }

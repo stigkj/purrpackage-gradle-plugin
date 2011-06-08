@@ -31,7 +31,6 @@ dependencies {
      testCompile "junit:junit:4.8.2"
      testRuntime "net.sourceforge.purrpackage:purrpackage-runtime:${purrpackageVersion}"   
      purrpackage "net.sourceforge.purrpackage:purrpackage:${purrpackageVersion}"
-     purrpackage "org.apache.ant:ant-junit:1.8.2"
 }
 
 test {
@@ -46,17 +45,12 @@ task testJUnit( type: Test ) {
         testReportDir = file( "${buildDir}/junit-report" )
 }
 
-//task junit( type: net.sourceforge.purrpackage.gradle.PurrPackageJUnitTask ) {
-//     initDefaults();
-//     excludes << "**/SittingDuck*";
-//}
-
 task instrument( type: net.sourceforge.purrpackage.gradle.CoberturaInstrumentTask ) {
      initDefaults();
      classpathWithCobertura = project.configurations.purrpackage.asPath;
 }
 
-task instrumentTests( type: net.sourceforge.purrpackage.gradle.PurrPackageInstrumentJUnitTestTask ) {
+task instrumentTests( type: net.sourceforge.purrpackage.gradle.PurrPackageTestInstrumentTask ) {
 }
 
 task uninstrument( type: net.sourceforge.purrpackage.gradle.CoberturaUninstrumentTask ) {
@@ -68,6 +62,7 @@ task ppReport( type: net.sourceforge.purrpackage.gradle.PurrPackageReportTask ) 
 
 instrument.dependsOn( testClasses );
 test.dependsOn( instrument );
+test.dependsOn( instrumentTests );
 testJUnit.dependsOn( test );
 testJUnit.dependsOn( instrumentTests );
 ppReport.dependsOn( testJUnit );

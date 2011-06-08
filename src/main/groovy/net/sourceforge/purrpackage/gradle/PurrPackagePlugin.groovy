@@ -23,25 +23,27 @@ import org.gradle.api.logging.LogLevel;
 class PurrPackagePlugin implements Plugin<Project> {
 
 	public void apply(Project p) {
-                String purrpackageVersion = p.properties.get( "purrpackageVersion" );
-                if ( purrpackageVersion == null || purrpackageVersion.trim().length() == 0 ) {
-                   throw new RuntimeException( "You must set the purrpackageVersion property before apply the Purrpackage Plugin" );
-                }
+        String purrpackageVersion = p.properties.get( "purrpackageVersion" );
+        if ( purrpackageVersion == null || purrpackageVersion.trim().length() == 0 ) {
+            throw new RuntimeException( "You must set the purrpackageVersion property before applying the Purrpackage Plugin" );
+        }
 		PurrPackagePluginConvention config = new PurrPackagePluginConvention(p);
 		p.convention.plugins.purrpackage = config;
 
-		p.configurations.add( "purrpackage" );
-		p.dependencies.add( "purrpackage",
-			"net.sourceforge.purrpackage:purrpackage:${purrpackageVersion}", { exclude ( group: "org.apache.ant" ) } );
-                p.dependencies.add( "purrpackage", "org.apache.ant:ant-junit:1.8.2" );
-		p.dependencies.add( "testRuntime",
-				"net.sourceforge.purrpackage:purrpackage-runtime:${purrpackageVersion}", { exclude ( group: "org.apache.ant" ) } );
 
+        p.configurations.add( "purrpackage" );
+        p.dependencies.add( "purrpackage", 
+            "net.sourceforge.purrpackage:purrpackage:${purrpackageVersion}", 
+            { exclude ( group: "org.apache.ant" ) } );            
+        p.dependencies.add( "testRuntime",
+            "net.sourceforge.purrpackage:purrpackage-runtime:${purrpackageVersion}", 
+            { exclude ( group: "org.apache.ant" ) } );
+        
 		CoberturaInstrumentTask instrumentTask = p.tasks.add( "purrpackageInstrument", CoberturaInstrumentTask.class );
 		instrumentTask.defaultValueFactory = config;
 
-                PurrPackageInstrumentJUnitTestTask testInstrumentTask = p.tasks.add( "purrpackageInstrumentTests", PurrPackageInstrumentJUnitTestTask.class );
-                testInstrumentTask.defaultValueFactory = config;
+        PurrPackageTestInstrumentTask testInstrumentTask = p.tasks.add( "purrpackageTestInstrument", PurrPackageTestInstrumentTask.class );
+        testInstrumentTask.defaultValueFactory = config;
 
 		PurrPackageReportTask reportTask = p.tasks.add( "purrpackageReport", PurrPackageReportTask.class );
 		reportTask.defaultValueFactory = config;
@@ -49,38 +51,28 @@ class PurrPackagePlugin implements Plugin<Project> {
 		CoberturaUninstrumentTask uninstrumentTask = p.tasks.add( "purrpackageUninstrument", CoberturaUninstrumentTask.class ) ;
 		
 		instrumentTask.dependsOn( p.testClasses );
-                testInstrumentTask.dependsOn( p.testClasses );
-//		reportTask.dependsOn( p.test );
+        testInstrumentTask.dependsOn( p.testClasses );
 		uninstrumentTask.dependsOn( reportTask );
 		p.assemble.dependsOn( uninstrumentTask );
 
-		p.tasks.each { testTask ->
-			if ( testTask instanceof Test ) {
-				configureTestTask(p, (Test) testTask, config)
-				testTask.dependsOn( instrumentTask );
-                                testTask.dependsOn( testInstrumentTask );
-                                reportTask.dependsOn( testTask );
-				uninstrumentTask.dependsOn( testTask );
-			}
-		}
-
-//		PurrPackageJUnitTask junitTask = p.tasks.add( "purrpackageJunitRunner", PurrPackageJUnitTask.class )
-//		junitTask.defaultValueFactory = config;
-		
-//		junitTask.dependsOn( p.test );
-//		reportTask.dependsOn( junitTask );
-		
-		p.logger.log( LogLevel.INFO, "Applied PurrPackagePlugin version ${purrpackageVersion}" );
+        p.afterEvaluate {
+            p.tasks.each { testTask ->
+                if ( testTask instanceof Test ) {
+                    configureTestTask(p, (Test) testTask, config)
+                    testTask.dependsOn( instrumentTask );
+                    testTask.dependsOn( testInstrumentTask );
+                    reportTask.dependsOn( testTask );
+                    uninstrumentTask.dependsOn( testTask );
+                    p.logger.info( "PurrPackage configured " + testTask );
+                }
+            }
+        }
+		p.logger.info( "Applied PurrPackagePlugin version with PurrPackage v. ${purrpackageVersion}" );
 	}
 
 	def configureTestTask( Project p, Test testTask, PurrPackagePluginConvention config ) {
 		testTask.doFirst {
 			systemProperties["net.sourceforge.cobertura.datafile"] = config.coverageDataFile.canonicalPath;
-			def opts = testTask.getOptions();
-			if ( opts instanceof TestNGOptions ) {
-				TestNGOptions tngo = opts;
-				tngo.listeners << "net.sourceforge.purrpackage.recording.PerPackageCoverageListener";
-			}
 		}
 	}
 }
@@ -90,21 +82,19 @@ class PurrPackagePluginConvention implements DefaultValueFactory {
 
 	File coverageDataFile;
 	File classesDir;
-	File saveUninstrumentedDir;
+	File saveClassesDir;
+    File testClassesDir;
+    File saveTestClassesDir;
 	File purrpackageReportDir;
 	Collection sourceDirs;
-	boolean useJunit = false;
-	Collection<String> junitIncludes;
-	Collection<String> junitExcludes;
-	Collection<String> junitJvmArgs;
-	File junitOutputDir;
 	
 	Project project;
 	
 	String getClasspathWithPurrpackage() {
 		return project.configurations.purrpackage.asPath;
 	}
-	String getClasspathWithCobertura() {
+    
+    String getClasspathWithCobertura() {
 		return getClasspathWithPurrpackage();
 	}
 
@@ -120,15 +110,13 @@ class PurrPackagePluginConvention implements DefaultValueFactory {
 		ProjectValueFactory dvf = new ProjectValueFactory( );
 		dvf.setProject( project );
 		coverageDataFile = dvf.coverageDataFile;
-		saveUninstrumentedDir = dvf.saveUninstrumentedDir;
-		purrpackageReportDir = dvf.purrpackageReportDir;
-		classesDir = dvf.classesDir
-		purrpackageReportDir = dvf.purrpackageReportDir;
+
+        classesDir = dvf.classesDir
+        saveClassesDir = dvf.saveClassesDir;
+        testClassesDir = dvf.testClassesDir
+        saveTestClassesDir = dvf.saveTestClassesDir;
+
+        purrpackageReportDir = dvf.purrpackageReportDir;
 		sourceDirs = dvf.sourceDirs;
-                useJunit = dvf.useJunit;
-		junitIncludes = dvf.junitIncludes;
-		junitExcludes = dvf.junitExcludes;
-		junitJvmArgs = dvf.junitJvmArgs;
-		junitOutputDir = dvf.junitOutputDir;
 	}
 }

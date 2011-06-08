@@ -32,6 +32,7 @@ boolean assertFileExists( dir, path ) {
 def checkDir( dir, anExpectedFile ) {
     def targetBuildDir = new File( dir, "build" );
     assertFileExists( targetBuildDir, "junit-report/index.html" );
+    assertFileExists( targetBuildDir, "purrpackage-coverage-data/purrpackage.db" );
     assertFileExists( targetBuildDir, anExpectedFile );
     assertFileExists( targetBuildDir, "purrpackage-report/standard/policyBrowser.html" );
     assertFileExists( targetBuildDir, "reports/tests/testng-results.xml" );
@@ -41,7 +42,7 @@ task pluginTestTask( type: GradleBuild ) {
      dependsOn test
      dir = "pluginTest"
      tasks = ["clean", "build"]   
-     startParameter.projectProperties.put( "purrpackageVersion", "0.8" )
+     startParameter.projectProperties.put( "purrpackageVersion", "0.8.0" )
      startParameter.projectProperties.put( "pluginVersion", "${version}" )
      doLast {
        checkDir( dir, "junit-report/net.sourceforge.purrpackage.gradle.test.other.OtherDuckJUnitTest.html" );
@@ -55,7 +56,7 @@ task taskTestTask( type: GradleBuild ) {
      dependsOn test
      dir = "tasksTest"
      tasks = ["clean", "build" ]
-     startParameter.projectProperties.put( "purrpackageVersion", "0.8" )
+     startParameter.projectProperties.put( "purrpackageVersion", "0.8.0" )
      startParameter.projectProperties.put( "pluginVersion", "${version}" )
      doLast {
        checkDir( dir, "junit-report/net.sourceforge.purrpackage.gradle.test.other.OtherDuckTest.html" );

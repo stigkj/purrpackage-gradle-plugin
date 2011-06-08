@@ -23,7 +23,7 @@ class CoberturaInstrumentTask extends DefaultTask {
 
     boolean defaultsInited = false;
     File coverageDataFile;
-    File saveUninstrumentedDir;
+    File saveClassesDir;
     File classesDir;
     String classpathWithCobertura;
     DefaultValueFactory defaultValueFactory = new ProjectValueFactory();
@@ -33,7 +33,7 @@ class CoberturaInstrumentTask extends DefaultTask {
 		dvf.setProject( project );
 		coverageDataFile = dvf.coverageDataFile;
 		classesDir = dvf.classesDir;
-		saveUninstrumentedDir = dvf.saveUninstrumentedDir;
+		saveClassesDir = dvf.saveClassesDir;
 		classpathWithCobertura = dvf.classpathWithCobertura;
 		defaultsInited = true;
     }
@@ -43,7 +43,7 @@ class CoberturaInstrumentTask extends DefaultTask {
 		if( !defaultsInited ) {
 			initDefaults();
 		}
-		logger.log( LogLevel.INFO, "Cobertura will instrument ${classesDir} saving originals to ${saveUninstrumentedDir}" );
+		logger.log( LogLevel.INFO, "Cobertura will instrument ${classesDir} saving originals to ${saveClassesDir}" );
 		logger.log( LogLevel.INFO, "Cobertura coverage data will be stored in ${coverageDataFile}");
 		logger.log( LogLevel.DEBUG, "We will look for Cobertura in classpath: ${classpathWithCobertura}")
 
@@ -52,9 +52,9 @@ class CoberturaInstrumentTask extends DefaultTask {
 			delete(dir: cobDir.canonicalPath, failonerror:false);
             mkdir(dir: cobDir.canonicalPath );
             taskdef(resource:'tasks.properties', classpath: classpathWithCobertura );
-            delete(dir: saveUninstrumentedDir, failonerror:false);
-            mkdir(dir: saveUninstrumentedDir)
-            copy(todir: saveUninstrumentedDir) {
+            delete(dir: saveClassesDir, failonerror:false);
+            mkdir(dir: saveClassesDir)
+            copy(todir: saveClassesDir) {
                 fileset(dir: classesDir);
             }
             'cobertura-instrument'(datafile: "${coverageDataFile.canonicalPath}") {

@@ -43,12 +43,12 @@ class CoberturaUninstrumentTask extends DefaultTask {
 		if ( c == null ) {
 			throw new NullPointerException( "instrumentTask not defined, and no (unique) CoberturaInstrumentTask found in ${found}" );
 		}
-		logger.log( LogLevel.DEBUG, "Restoring ${c.classesDir} from uninstrumented ${c.saveUninstrumentedDir}" );
+		logger.log( LogLevel.DEBUG, "Restoring ${c.classesDir} from uninstrumented ${c.saveClassesDir}" );
 		project.ant {
 			delete(dir: c.classesDir );
 			mkdir(dir: c.classesDir );
 			copy(todir: c.classesDir) {
-				fileset(dir: c.saveUninstrumentedDir);
+				fileset(dir: c.saveClassesDir);
 			}
 		}
 	}

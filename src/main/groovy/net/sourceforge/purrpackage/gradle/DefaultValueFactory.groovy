@@ -29,12 +29,16 @@ interface DefaultValueFactory {
 
 	File getClassesDir();
 
-	File getSaveUninstrumentedDir();
+	File getSaveClassesDir();
+    
+    File getTestClassesDir();
+    
+    File getSaveTestClassesDir();
 
 	String getClasspathWithCobertura();
 	
-	String getClasspathWithPurrpackage();
-	
+    String getClasspathWithPurrpackage();
+    
 	File getPurrpackageReportDir();
 
 	Collection getSourceDirs();
@@ -42,15 +46,5 @@ interface DefaultValueFactory {
 	String getCoveragePolicy();
 	
 	String getBuildTimeReportScript();
-
-	boolean getUseJunit();
-	
-	Collection<String> getJunitIncludes();
-
-	Collection<String> getJunitExcludes();
-
-	Collection<String> getJunitJvmArgs();
-
-	File getJunitOutputDir();	
 	
 }

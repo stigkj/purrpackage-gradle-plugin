@@ -7,29 +7,16 @@ buildscript {
     }
 }
 
-apply plugin: 'groovy'
-apply plugin: 'eclipse'
-
-// The purrpackage plugin adds a cobertura system property
-// and a TestNG listener to test tasks. So it needs them
-// to be declared before applied.
-
-task testJUnit( type: Test ) {
-        include "**/*JUnitTest.class";
-        testReportDir = file( "${buildDir}/junit-report" );
-}
-
-apply plugin: 'purrpackage'
-
-//project.convention.plugins.purrpackage.configure {
-//    useJunit = true;
-//    junitIncludes = ["**/*JUnitTest.class"]; 
-//}
-
 repositories {
      mavenLocal();
      mavenCentral();
 }
+
+apply plugin: 'groovy'
+apply plugin: 'eclipse'
+
+apply plugin: 'purrpackage'
+
 
 dependencies {
      groovy localGroovy()
@@ -41,3 +28,14 @@ test {
      useTestNG() 
 }
 
+// FIXME
+// The purrpackage plugin adds a cobertura system property
+// and a TestNG listener to test tasks. So it needs them
+// to be declared before applied.
+
+task testJUnit( type: Test ) {
+        include "**/*JUnitTest.class";
+        testReportDir = file( "${buildDir}/junit-report" );
+}
+
+check.dependsOn( testJUnit )

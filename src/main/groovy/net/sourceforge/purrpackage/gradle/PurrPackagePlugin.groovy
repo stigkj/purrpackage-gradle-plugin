@@ -85,6 +85,7 @@ class PurrPackagePluginConvention implements DefaultValueFactory {
 	File saveClassesDir;
     File testClassesDir;
     File saveTestClassesDir;
+    String selectorClass;
 	File purrpackageReportDir;
 	Collection sourceDirs;
 	

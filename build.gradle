@@ -12,7 +12,7 @@ apply plugin: 'eclipse'
 apply plugin: 'maven-oss'
 
 group = 'net.sourceforge.purrpackage'
-version = '1.1'
+version = '2.0'
 
 repositories {
    mavenCentral();

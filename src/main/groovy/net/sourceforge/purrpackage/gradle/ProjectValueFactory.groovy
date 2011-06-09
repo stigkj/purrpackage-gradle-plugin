@@ -62,5 +62,6 @@ class ProjectValueFactory implements DefaultValueFactory {
 
 	String coveragePolicy = "";
 	String buildTimeReportScript = "";
+    String selectorClass;
 		
 }

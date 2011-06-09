@@ -34,6 +34,8 @@ interface DefaultValueFactory {
     File getTestClassesDir();
     
     File getSaveTestClassesDir();
+    
+    String getSelectorClass();
 
 	String getClasspathWithCobertura();
 	

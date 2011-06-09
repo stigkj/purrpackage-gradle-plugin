@@ -25,6 +25,7 @@ class PurrPackageTestInstrumentTask extends DefaultTask {
     File saveTestClassesDir;
     File testClassesDir;
     String classpathWithPurrpackage;
+    String selectorClass;
     DefaultValueFactory defaultValueFactory = new ProjectValueFactory();
 
     def initDefaults() {
@@ -33,6 +34,7 @@ class PurrPackageTestInstrumentTask extends DefaultTask {
 		testClassesDir = dvf.testClassesDir;
 		saveTestClassesDir = dvf.saveTestClassesDir;
 		classpathWithPurrpackage = dvf.classpathWithPurrpackage;
+        selectorClass = dvf.selectorClass;
 		defaultsInited = true;
     }
 
@@ -59,9 +61,13 @@ class PurrPackageTestInstrumentTask extends DefaultTask {
             }
             java( classname:"net.sourceforge.purrpackage.recording.instrument.PurrPackageTestInstrumenterMain",
                 fork:"true",
+                failonerror:"true",
                 classpath: cp ) {
                     arg( value: "${testClassesDir}" )
                     arg( value: "${tmpdir}")
+                    if ( selectorClass != null && selectorClass.trim().length() > 0 ) {
+                        arg( value: selectorClass )
+                    }
                     arg( value: "${bd}/test-instrument.log" )
                 };
             delete( dir: testClassesDir );

@@ -63,11 +63,15 @@ class PurrPackageTestInstrumentTask extends DefaultTask {
                 fork:"true",
                 failonerror:"true",
                 classpath: cp ) {
+                    arg( value: "--source" )
                     arg( value: "${testClassesDir}" )
+                    arg( value: "--dest" )
                     arg( value: "${tmpdir}")
                     if ( selectorClass != null && selectorClass.trim().length() > 0 ) {
+                        arg( value: "--selectorClass" )
                         arg( value: selectorClass )
                     }
+                    arg( value: "--logFile" )
                     arg( value: "${bd}/test-instrument.log" )
                 };
             delete( dir: testClassesDir );
